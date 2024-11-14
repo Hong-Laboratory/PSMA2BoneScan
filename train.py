@@ -20,16 +20,17 @@ def get_args_parser():
     parser.add_argument('--some_notes_about_experim', default='''mask bladder and kidney in PET, reduce lr ''')
 
     # Set Paths
-    parser.add_argument('--data_path', default="/path/to/trainset")
-    parser.add_argument('--val_path', default="/path/to/valset")
-    
+    parser.add_argument('--data_dir', default="/path/to/trainset")
+    parser.add_argument('--val_dir', default="/path/to/valset")
+    parser.add_argument('--sample_image_dir', default="/path/to/trainset/sample", help="""A sample patient dir from the training set to visualize training progress""")
+
     # Checkpoint related parameters
     parser.add_argument('--output_path', default='/path/to/results/dir', type=str, help="""Path to save checkpoints""")
     parser.add_argument('--save_every', default=100, type=int, help="""Save checkpoint after every n epochs""")
     parser.add_argument('--max_to_keep', default=5, type=int, help="Max number of checkpoints to keep be CheckpointManager")
     
     # Model parameters
-    parser.add_argument('--gan_mode', default='vanilla', choices=['vanilla', 'lsgan'], help="""Declare GAN type for adverserial loss function.""")
+    parser.add_argument('--gan_mode', default='vanilla', choices=['vanilla', 'lsgan'], help="""What kind of adverserial loss function?""")
     parser.add_argument('--gen_arch', default='pix2pix', choices=['pix2pix', 'unet'], help="""Architiectire for Generators. Paper uses ResNet.""")
     parser.add_argument('--disc_arch', default='pixel', choices=['patch', 'pixel', 'MedGAN'], help="""Architiectire for Discriminators. Paper uses PatchGAN.""")
     parser.add_argument('--num_downsample_layers', default=2, type=int, help="""Number of downsampling layers for ResNet generator. Number of upsampling layers will automatically match.""")
@@ -159,10 +160,10 @@ if __name__ == "__main__":
         loss_obj = tf.keras.losses.MeanSquaredError()
 
     # Define Dataset
-    train_dataset = data_loader.create_dataset(args.data_path, batch_size=args.batch_size, buffer_size=args.buffer_size, train=True, input_size=(256,256, 256))
-    val_dataset = data_loader.create_dataset(args.val_path, batch_size=args.batch_size, train=False, input_size=(256, 256, 256))
-    n_train = len(glob(f"{args.data_path}/*"))
-    n_val = len(glob(f"{args.val_path}/*"))
+    train_dataset = data_loader.create_dataset(args.data_dir, batch_size=args.batch_size, buffer_size=args.buffer_size, train=True, input_size=(256,256, 256))
+    val_dataset = data_loader.create_dataset(args.val_dir, batch_size=args.batch_size, train=False, input_size=(256, 256, 256))
+    n_train = len(glob(f"{args.data_dir}/*"))
+    n_val = len(glob(f"{args.val_dir}/*"))
     
     # Build model
     gen = models.build_generator(arch=args.gen_arch, num_blocks=args.num_downs, output_channels=1, base_filters=args.num_filters, use_dropout=args.use_dropout)
@@ -192,7 +193,7 @@ if __name__ == "__main__":
     manager = tf.train.CheckpointManager(ckpt, args.output_path, max_to_keep=args.max_to_keep, )   
 
     # Get sample image from training set to visualize training process
-    sample = data_loader.sample_image("/app/data/train/060_PSMA_UCLA/(2, 2, 4)")
+    sample = data_loader.sample_image(args.sample_image_dir)
 
     # Start training loop
     for epoch in tqdm(range(args.epochs)):
