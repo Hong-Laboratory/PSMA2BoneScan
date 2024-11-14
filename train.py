@@ -15,7 +15,7 @@ import tensorflow_probability as tfp
 
 
 def get_args_parser():
-    parser = argparse.ArgumentParser('MedGAN', add_help=False)
+    parser = argparse.ArgumentParser('PSMA2BS', add_help=False)
     
     parser.add_argument('--some_notes_about_experim', default='''mask bladder and kidney in PET, reduce lr ''')
 
@@ -24,7 +24,7 @@ def get_args_parser():
     parser.add_argument('--val_path', default="/path/to/valset")
     
     # Checkpoint related parameters
-    parser.add_argument('--ckpt_path', default='/path/to/results/dir', type=str, help="""Path to save checkpoints""")
+    parser.add_argument('--output_path', default='/path/to/results/dir', type=str, help="""Path to save checkpoints""")
     parser.add_argument('--save_every', default=100, type=int, help="""Save checkpoint after every n epochs""")
     parser.add_argument('--max_to_keep', default=5, type=int, help="Max number of checkpoints to keep be CheckpointManager")
     
@@ -136,13 +136,13 @@ if __name__ == "__main__":
     for gpu in gpus:
         tf.config.experimental.set_memory_growth(gpu, True)
 
-    parser = argparse.ArgumentParser('MedGAN', parents=[get_args_parser()])
+    parser = argparse.ArgumentParser('PSMA2BS', parents=[get_args_parser()])
     args = parser.parse_args()
 
     # Save command line arguments
     args_dict = vars(args)
-    os.makedirs(args.ckpt_path, exist_ok=True)
-    with open(os.path.join(args.ckpt_path, 'args.json'), 'w') as json_file:
+    os.makedirs(args.output_path, exist_ok=True)
+    with open(os.path.join(args.output_path, 'args.json'), 'w') as json_file:
         json.dump(args_dict, json_file, indent=4)
     
     # Metrics logger setup
@@ -189,7 +189,7 @@ if __name__ == "__main__":
                               generator_optimizer=generator_optimizer,
                               discriminator_optimzer=discriminator_optimizer)
 
-    manager = tf.train.CheckpointManager(ckpt, args.ckpt_path, max_to_keep=args.max_to_keep, )   
+    manager = tf.train.CheckpointManager(ckpt, args.output_path, max_to_keep=args.max_to_keep, )   
 
     # Get sample image from training set to visualize training process
     sample = data_loader.sample_image("/app/data/train/060_PSMA_UCLA/(2, 2, 4)")
@@ -231,14 +231,14 @@ if __name__ == "__main__":
 
         if (epoch+1) % args.save_every == 0:
             # Save validation images 
-            utils.save_images(args.ckpt_path, epoch=epoch+1, preds=metric_logger.translated_images, ground_truths=metric_logger.ground_truths, title='val')
+            utils.save_images(args.output_path, epoch=epoch+1, preds=metric_logger.translated_images, ground_truths=metric_logger.ground_truths, title='val')
             manager.save()
             
             # Pss sample image through model to visualize trainging progress
             translated, _ = val_step(sample['inputs'], sample['targets'])
-            utils.save_images(args.ckpt_path, epoch=epoch+1, preds=[translated.numpy()], ground_truths=[sample['targets'].numpy()], title='sample')
+            utils.save_images(args.output_path, epoch=epoch+1, preds=[translated.numpy()], ground_truths=[sample['targets'].numpy()], title='sample')
             
             # Log losses
-            metric_logger.on_checkpoint(save_path=args.ckpt_path)
+            metric_logger.on_checkpoint(save_path=args.output_path)
 
 
