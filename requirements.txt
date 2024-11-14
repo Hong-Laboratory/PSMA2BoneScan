@@ -10,4 +10,3 @@ tensorflow==2.13.1
 tensorflow_addons==0.21.0
 tensorflow_probability==0.20.0
 tqdm==4.66.2
-transformers==4.41.2
