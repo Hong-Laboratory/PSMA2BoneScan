@@ -156,7 +156,7 @@ def DataGenerator(dir_path, input_size, train=True):
     Load image -> random crop -> window CT -> augmentation 
     -> normalization -> match dim shape
     """
-    for path in glob(f"{dir_path}/*/(2, 2, 4)"):
+    for path in glob(f"{dir_path}/*"):
 
         # Load images as tf tensors
         ct = load_3d(f"{path}/CT.npy")
