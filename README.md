@@ -30,10 +30,10 @@ val/
 ├── patient_200/
 ```
 ## Project Structure
-models.py: Contains the Pix2Pix generator and discriminator models.
-data_loader.py: Manages loading and preprocessing of PET/CT and bone scan data.
-train.py: Runs the training loop, validation loop, outputs metrics, and saves results.
-utils.py: Utility functions for data handling and metric calculations.
+- models.py: Contains the Generator and Discriminator models.
+- data_loader.py: Manages loading and preprocessing of PET/CT and bone scan data.
+- train.py: Runs the training loop, validation loop, outputs metrics, and saves results.
+- utils.py: Utility functions for data handling and metric calculations.
 
 ## Setup Instructions
 This project requires Python 3.8. To set up the environment and dependencies, follow these steps:
